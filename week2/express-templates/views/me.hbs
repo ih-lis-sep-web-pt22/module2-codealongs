@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <h1>Hi, I'm {{name}} {{#if surname}}{{surname}}{{/if}}</h1>
+  <p>I'm a {{occupation}} from {{location}}</p>
+  {{#if age}}
+  <p>I'm {{age}} years old.</p>
+  {{else}}
+  <p>There is no age on the records.</p>
+  {{/if}}
+
+  {{#unless address}}
+  <p>There is no address on the records so here's a cat for you.</p>
+  <img src="/images/cool-cat.jpeg" alt="" width="300">
+  {{else}}
+  <p>I'm at {{address}}</p>
+  {{/unless}}
+
+  <p>My favorite things to eat are:</p>
+  <ul>
+    {{#each favoriteFoods}}
+    <li>{{@index}}: {{this}}</li>
+    {{/each}}
+  </ul>
+</body>
+
+</html>

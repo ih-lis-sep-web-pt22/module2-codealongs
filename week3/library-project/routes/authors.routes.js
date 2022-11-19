@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Author = require('../models/Author.model');
+const Book = require('../models/Book.model');
 
 // Create author
 router.get('/create', (req, res, next) => {
@@ -32,6 +33,40 @@ router.get('/', async (req, res, next) => {
   try {
     const authors = await Author.find();
     res.render('author/authors-list', { authors });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/:authorId', async (req, res, next) => {
+  try {
+    const { authorId } = req.params;
+
+    const author = await Author.findById(authorId).populate('books');
+    const booksList = await Book.find();
+    const { _id, name, bio, picture_url, books } = author;
+    res.render('author/author-details', {
+      _id,
+      name,
+      bio,
+      picture_url,
+      books,
+      booksList
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/:authorId/edit', async (req, res, next) => {
+  try {
+    const { authorId } = req.params;
+    // console.log(req.body);
+    const { books } = req.body;
+    await Author.findByIdAndUpdate(authorId, {
+      $push: { books }
+    });
+    res.redirect(`/authors/${authorId}`);
   } catch (error) {
     next(error);
   }

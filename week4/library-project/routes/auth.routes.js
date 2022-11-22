@@ -3,9 +3,10 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const User = require('../models/User.model');
 const mongoose = require('mongoose');
+const { isLoggedIn, isLoggedOut } = require('../middleware/route-guard');
 const saltRounds = 10;
 
-router.get('/signup', async (req, res, next) => {
+router.get('/signup', isLoggedOut, (req, res, next) => {
   try {
     res.render('auth/signup');
   } catch (error) {
@@ -13,7 +14,7 @@ router.get('/signup', async (req, res, next) => {
   }
 });
 
-router.post('/signup', async (req, res, next) => {
+router.post('/signup', isLoggedOut, async (req, res, next) => {
   try {
     // console.log(req.body);
     const { username, email, password } = req.body;
@@ -25,12 +26,10 @@ router.post('/signup', async (req, res, next) => {
     const passwordRegex =
       /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{6,}$/gm;
     if (!passwordRegex.test(password)) {
-      return res
-        .status(500)
-        .render('auth/signup', {
-          errorMessage:
-            'Password needs to be at least 6 characters and must contain one uppercase letter, one lowercase letter, a number and a special character.'
-        });
+      return res.status(500).render('auth/signup', {
+        errorMessage:
+          'Password needs to be at least 6 characters and must contain one uppercase letter, one lowercase letter, a number and a special character.'
+      });
     }
     const salt = await bcrypt.genSalt(saltRounds);
     const passwordHash = await bcrypt.hash(password, salt);
@@ -49,12 +48,57 @@ router.post('/signup', async (req, res, next) => {
   }
 });
 
-router.get('/profile', async (req, res, next) => {
+router.get('/profile', isLoggedIn, (req, res, next) => {
   try {
-    res.render('auth/profile');
+    const { currentUser } = req.session;
+    res.render('auth/profile', currentUser);
   } catch (error) {
     next(error);
   }
+});
+
+router.get('/login', isLoggedOut, (req, res, next) => {
+  try {
+    res.render('auth/login');
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/login', isLoggedOut, async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    // console.log('--> Session', req.session);
+    if (email === '' || password === '') {
+      return res.render('auth/login', {
+        errorMessage: 'Please enter both email and password.'
+      });
+    }
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.render('auth/login', {
+        errorMessage: 'Email is not registered. Please try another email.'
+      });
+      // checking if the password matches
+    } else if (bcrypt.compareSync(password, user.passwordHash)) {
+      // rendering the user to the profile view
+      req.session.currentUser = user;
+      res.redirect('/profile');
+    } else {
+      res.render('auth/login', { errorMessage: 'Incorrect password.' });
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/logout', (req, res, next) => {
+  req.session.destroy(error => {
+    if (error) {
+      next(error);
+    }
+    res.redirect('/');
+  });
 });
 
 module.exports = router;

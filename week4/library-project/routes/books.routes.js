@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const Book = require('../models/Book.model');
+const { isLoggedIn } = require('../middleware/route-guard');
 
 // ------ CRUD - Create -------
-router.get('/books/create', (req, res, next) => {
+router.get('/books/create', isLoggedIn, (req, res, next) => {
   try {
     res.render('books/book-create');
   } catch (error) {
@@ -11,7 +12,7 @@ router.get('/books/create', (req, res, next) => {
   }
 });
 
-router.post('/books/create', async (req, res, next) => {
+router.post('/books/create', isLoggedIn, async (req, res, next) => {
   try {
     // console.log(req.body);
     const { title, author, description, rating } = req.body;
@@ -57,7 +58,7 @@ router.get('/books/:bookId', async (req, res, next) => {
 
 // ------- CRUD - Update ------
 
-router.get('/books/:bookId/edit', async (req, res, next) => {
+router.get('/books/:bookId/edit', isLoggedIn, async (req, res, next) => {
   try {
     const { bookId } = req.params;
     const book = await Book.findById(bookId);
@@ -67,7 +68,7 @@ router.get('/books/:bookId/edit', async (req, res, next) => {
   }
 });
 
-router.post('/books/:bookId/edit', async (req, res, next) => {
+router.post('/books/:bookId/edit', isLoggedIn, async (req, res, next) => {
   try {
     const { bookId } = req.params;
     const { title, author, description, rating } = req.body;
@@ -85,7 +86,7 @@ router.post('/books/:bookId/edit', async (req, res, next) => {
 
 // CRUD - Delete
 
-router.post('/books/:bookId/delete', async (req, res, next) => {
+router.post('/books/:bookId/delete', isLoggedIn, async (req, res, next) => {
   try {
     const { bookId } = req.params;
     await Book.findByIdAndDelete(bookId);

@@ -2,13 +2,14 @@ const express = require('express');
 const router = express.Router();
 const Author = require('../models/Author.model');
 const Book = require('../models/Book.model');
+const { isLoggedIn } = require('../middleware/route-guard');
 
 // Create author
-router.get('/create', (req, res, next) => {
+router.get('/create', isLoggedIn, (req, res, next) => {
   res.render('author/author-create');
 });
 
-router.post('/create', async (req, res, next) => {
+router.post('/create', isLoggedIn, async (req, res, next) => {
   try {
     // console.log(req.body);
     const { name, bio, picture_url } = req.body;
@@ -38,7 +39,7 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-router.get('/:authorId', async (req, res, next) => {
+router.get('/:authorId', isLoggedIn, async (req, res, next) => {
   try {
     const { authorId } = req.params;
 
@@ -58,7 +59,7 @@ router.get('/:authorId', async (req, res, next) => {
   }
 });
 
-router.post('/:authorId/edit', async (req, res, next) => {
+router.post('/:authorId/edit', isLoggedIn, async (req, res, next) => {
   try {
     const { authorId } = req.params;
     // console.log(req.body);

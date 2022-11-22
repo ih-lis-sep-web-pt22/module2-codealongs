@@ -15,8 +15,15 @@
    <a href="/books/create">Create a book</a>
    <a href="/authors">See the authors</a>
    <a href="/authors/create">Create an author</a>
+   <a href="/profile">Profile</a>
    <a href="/signup">Signup</a>
+   <a href="/login">Login</a>
 
+   {{#if username}}
+   <form action="/logout" method="post">
+      <button type="submit">Logout</button>
+   </form>
+   {{/if}}
    {{{body}}}
 
    <script src="/js/script.js"></script>
